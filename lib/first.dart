@@ -11,13 +11,12 @@ class First extends StatefulWidget {
 }
 
 class _FirstState extends State<First> {
+  TextEditingController myText = TextEditingController();
+  TextEditingController myValue = TextEditingController();
 
-  TextEditingController myText=TextEditingController();
-  TextEditingController myValue=TextEditingController(); 
+  var mybox = Hive.box('Mybox');
 
-  var mybox=Hive.box('Mybox');
-
-  List mydata=[];
+  List mydata = [];
 
   @override
   void initState() {
@@ -26,56 +25,78 @@ class _FirstState extends State<First> {
     getItem();
   }
 
-  addItem(data)async{
+  addItem(data) async {
     await mybox.add(data);
     print(mybox.values);
-        getItem();
+    getItem();
   }
-  getItem(){
-   mydata= mybox.keys.map((e) {
 
-    var res=mybox.get(e);
+  deleteItem(key) async {
+    await mybox.delete(key);
+    getItem();
+  }
 
-    return{
-      'Key':e,
-      'title':res['title'],
-      'value':res['value'],
-    };
-   }).toList();
-   setState(() {
-     
-   });
+  // updateItem(key, updatedData) async {
+  //   await mybox.put(key, updatedData);
+  //   getItem();
+  // }
+
+  getItem() {
+    mydata = mybox.keys.map((e) {
+      var res = mybox.get(e);
+
+      return {
+        'Key': e,
+        'title': res['title'],
+        'value': res['value'],
+      };
+    }).toList();
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar( title: Text('Simple Database'),),
+      appBar: AppBar(
+        title: Text('Simple Database'),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: ListView(
           shrinkWrap: true,
           children: [
-            SizedBox(height: 20,),
-            TextField(controller: myText,
-            decoration: InputDecoration(hintText:'Enter desc'),),
-            SizedBox(height: 20,),
-            TextField(controller: myValue,
-            decoration: InputDecoration(hintText:'Enter value' ),),
-            SizedBox(height: 20,),
-            ElevatedButton.icon(onPressed: (){
-              Map<String,String> m1={
-                'title':myText.text,
-                'value':myValue.text,
-
-              };
-              addItem(m1);
-            },
-             icon: Icon(Icons.save),
-             label: Text('Save Date'),),
-             SizedBox(height: 20,),
-
-             ListView.builder(
+            SizedBox(
+              height: 20,
+            ),
+            TextField(
+              controller: myText,
+              decoration: InputDecoration(hintText: 'Enter desc'),
+            ),
+            SizedBox(
+              height: 20,
+            ),
+            TextField(
+              controller: myValue,
+              decoration: InputDecoration(hintText: 'Enter value'),
+            ),
+            SizedBox(
+              height: 20,
+            ),
+            ElevatedButton.icon(
+              onPressed: () {
+                Map<String, String> m1 = {
+                  'title': myText.text,
+                  'value': myValue.text,
+                };
+                addItem(m1);
+              },
+              icon: Icon(Icons.save),
+              label: Text('Save Date'),
+            ),
+            SizedBox(
+              height: 20,
+            ),
+            ListView.builder(
               itemCount: mydata.length,
               shrinkWrap: true,
               physics: NeverScrollableScrollPhysics(),
@@ -83,19 +104,25 @@ class _FirstState extends State<First> {
                 return ListTile(
                   title: Text("${mydata[index]['title']}"),
                   subtitle: Text("${mydata[index]['value']}"),
+                  // leading: IconButton(
+                  //     onPressed: () {
+                   
+                  //     },
+                  //     icon: Icon(Icons.save_as_outlined)),
+                  trailing: IconButton(
+                      onPressed: () {
+                        deleteItem(mydata[index]['Key']);
+                      },
+                      icon: Icon(Icons.delete_forever_outlined)),
                 );
-              },)
-
+              },
+            )
           ],
         ),
-        ),
+      ),
     );
   }
 }
-
-
-
-
 
 /*
 class First extends StatelessWidget {
